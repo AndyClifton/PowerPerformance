@@ -1,0 +1,41 @@
+\begin{thebibliography}{4}
+\newcommand{\enquote}[1]{``#1''}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Clifton \emph{et~al.}(2013{\natexlab{a}})Clifton, Daniels, and
+  Lehning}]{Clifton_2013_d}
+Clifton A, Daniels MH, Lehning M (2013{\natexlab{a}}).
+\newblock \enquote{Causes of Mountain Pass Winds and Their Effects on Wind
+  Turbines.}
+\newblock \emph{Wind Energy}.
+\newblock \doi{10.1002/we.1650}.
+
+\bibitem[{Clifton \emph{et~al.}(2013{\natexlab{b}})Clifton, Kilcher, Lundquist,
+  and Fleming}]{Clifton_2013_a}
+Clifton A, Kilcher L, Lundquist J, Fleming P (2013{\natexlab{b}}).
+\newblock \enquote{Using machine learning to predict wind turbine power
+  output.}
+\newblock \emph{Environmental Research Letters}, \textbf{8}(2), 024009.
+\newblock \doi{10.1088/1748-9326/8/2/024009}.
+
+\bibitem[{Malcolm and Hansen(2006)}]{Malcolm_32495}
+Malcolm DJ, Hansen A (2006).
+\newblock \enquote{Wind{PACT} Turbine Rotor Design Study.}
+\newblock \emph{Subcontract Report SR-500-32495}, National Renewable Energy
+  Laboratory.
+
+\bibitem[{Poore and Lettenmaier(2003)}]{Poore_2003_a}
+Poore R, Lettenmaier T (2003).
+\newblock \enquote{Alternative Design Study Report: Wind{PACT} Advanced Wind
+  Turbine Drive Train Designs Study.}
+\newblock \emph{Subcontractor Report NREL/SR-500-33196}, National Renewable
+  Energy Laboratory.
+
+\end{thebibliography}

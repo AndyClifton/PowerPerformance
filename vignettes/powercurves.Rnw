@@ -1,0 +1,370 @@
+\documentclass[nojss]{jss}
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{PowerPerformance}
+
+% use examples at http://onepager.togaware.com/KnitRO.pdf
+%\usepackage{natbib}
+\usepackage{amsmath}
+\usepackage{todonotes}
+
+\newcommand{\pname}{PowerPerformance}
+
+%% almost as usual
+\author{Andrew Clifton\\ National Renewable Energy Laboratory \And 
+Second Author\\Plus Affiliation}
+
+%% for pretty printing and a nice hypersummary also set:
+\Plainauthor{Andrew Clifton, Second Author} %% comma-separated
+\title{Modeling Wind Turbine Performance with \pname} %% without formatting
+\Shorttitle{\pkg{\pname}: Power Performance Modeling} %% a short title (if necessary)
+
+%% an abstract and keywords
+\Abstract{
+The \pkg{\pname} package includes a variety of functions that are designed to analyze and display wind turbine power performance data. The package also includes methods to model the turbine performance as a function of inflow conditions, including industry-standard approaches, proposed new standard methods, and research tools. Utility functions are also included to quantify and thus compare the accuracy of the different methods. This package accompanies results that were previously published in \cite{Clifton_2013_a} and \cite{Clifton_2013_d}.
+
+At the time of writing, \pkg{\pname} is only available upon request to the author and is supplied without warranty.
+}
+\Keywords{power curves, wind turbine modeling, machine learning, \proglang{R}}
+\Plainkeywords{power curves, wind turbine modeling, machine learning, R} %% without formatting
+%% at least one keyword must be supplied
+
+%% The address of (at least) one author should be given
+%% in the following format:
+\Address{
+Andrew Clifton\\
+Turbine Modeling and Wind Resource Group\\
+National Wind Technology Center\\
+National Renewable Energy Laboratory\\
+Golden, Colorado, United States of America\\
+E-mail: \email{andrew.clifton@nrel.gov}\\
+URL: \url{http://http://www.nrel.gov/wind/}
+}
+
+\begin{document}
+\maketitle
+
+<<echo=FALSE>>=
+library(knitr)
+opts_chunk$set(prompt = FALSE, 
+               verbose = FALSE,
+               tidy = FALSE,
+               width = 70,
+               useFancyQuotes = FALSE)
+@
+
+\section{Introduction}
+This vignette describes how the \pkg{\pname} package can be used to analyze wind turbine performance data and create different turbine performance models.
+
+\section{Obtaining and installing the package}
+The \pkg{\pname} package is currently a developer test version. It is not available through the repositories at \href{http://cran.r-project.org}{CRAN}. To request a copy of the code, please contact \href{mailto:andrew.clifton@nrel.gov}{andrew.clifton@nrel.gov}.
+
+Install \pkg{\pname} and load the package like any other package. To do this in an R client, set the working directory, detach any existing copies of the package, and load the new one:
+<<>>=
+setwd(".")
+library("windnrg")
+@
+
+\pkg{\pname} requires the \href{http://cran.r-project.org/web/packages/randomForest/index.html}{\pkg{randomForest}} and \href{http://cran.r-project.org/web/packages/ggplot2/index.html}{\pkg{ggplot2}} packages. 
+<<echo=FALSE>>=
+require(ggplot2)
+require(randomForest)
+@
+
+\section{Turbine performance data set}
+This vignette uses the \code{WindPACT1500kW} data set included in the \pkg{\pname} package. The \code{WindPACT1500kW} data set is a combination of inflow wind and turbine power data from simulations of the Wind Partnership for Advanced Component Technologies 1.5 MW wind turbine. The turbine is described in \citet{Poore_2003_a, Malcolm_32495}. The inflow was simulated using the stochastic wind field modeling tool, Turbsim, to create realistic wind fields for a neutral atmosphere that were then used to force a simulated turbine in the aero-elastic simulator FAST. Data from the inflow simulations and the turbine simulations were post processed using MATLAB to extract 1,524 observations of inflow and turbine response. The process is described in more detail in \citet{Clifton_2013_a} and \citet{Clifton_2013_d}. 
+
+The following variables are included in the \code{WindPACT1500kW} data set:
+\begin{description}
+\item[\code{ws.HH}]{hub-height wind speed (m/s)}
+\item[\code{Ti.HH}]{Turbulence intensity at hub height (\%)}
+\item[\code{Shear}]{The exponent of the power law fit to the velocity profile}
+\item[\code{ws.eq}]{A rotor-equivalent wind speed (m/s)}
+\item[\code{RSS}]{A metric describing the difference between the meaasured velocity profile and an ideal power-law profile}
+\item[\code{power.mean}]{The mean power under these conditions (kW)}
+\item[\code{power.std}]{The standard deviation of power under these conditions (kW)}
+\end{description}
+
+\section{Preparing the data}
+\subsection{Loading the data}
+The \code{WindPACT1500kW} data are loaded using the \code{data()} function:
+ <<>>=
+data(WindPACT1500kW)
+data.in <- WindPACT1500kW
+@
+
+We now have all of the variables listed above in a data frame, \code{data.in}. To see what's in there, we'll look at the first 3 rows of the data frame:
+ 
+<<>>=
+data.in[1:3,]
+@
+
+%\bibliographystyle{jss}
+\bibliography{../inst/examples/windenergy}
+
+\end{document}
+
+
+% \subsection{Data filtering and checking}
+% The \code{WindPACT1500kW} data are derived from simulations, and thus are more-or-less `perfect'. No filtering is required. However, if a real-world observational data set is being used, the user should be careful to filter the data before use. Check for (at least) the following:
+% \begin{itemize}
+% \item The wind is from sectors where there is no effect of tower or turbine wakes, and the cups and vanes or remote sensing devices are not shadowed by the turbine.
+% \item Wind speeds are within sensible ranges
+% \item Power is greater than 0 kW
+% \end{itemize}
+% 
+% To follow the rest of this vignette using your own data, the data should be put into a data frame with the same names as the \code{WindPACT1500kW} data set.
+% 
+% \subsection{Density correction}
+% If the turbine performance data are derived from simulations or observations that include a range of atmospheric pressure and temperature (and thus density $\rho$), a useful first step may be to adjust the wind speed $u$ to a reference density ($\rho_0$) according to the IEC 61400-12-1 standard. For a turbine with `active power control` or pitch control, this is done by scaling the velocity by the cube root of the density ratio:
+% 
+% \begin{equation}
+% u_{adj} = u\left(\frac{\rho}{\rho_0}\right)^{1/3}
+% \end{equation}
+% 
+% This is implemented using the function, \code{PCwsAdjDens()}. Inputs include the wind speed, density associated with that wind speed (in this case fixed at 1.225 kg/m$^3$), and the reference density to use:
+% <<>>=
+% data.in$ws.HH.adj <- PCwsAdjDens(ws = data.in$ws.HH,
+%                                  rho = 1.225,
+%                                  rho.ref = 1.225)
+% @
+% 
+% \subsection{The rotor-equivalent wind speed}
+% \cite{wagner_2011_a} suggests accounting for the shear in the inflow by calculating a turbine rotor-disk averaged wind speed and using that in place of the hub-height wind speed. The rotor equivalent wind speed (REWS or $u_{eq}$) is defined as
+% 
+% \begin{equation}
+% u_{eq} = \sum{u_i^3\frac{A_i}{A}}^{1/3}
+% \end{equation}
+% 
+% \noindent where $u_i$ is the wind speed in slice $i$, which has area $A_i$.
+% 
+% Given an array of wind speeds at different heights, we can use the \code{GetREWS()} function to calculate the REWS. \code{GetREWS()} divides the rotor disk into horizontal slices between heights $(z_{i-i} + z_{i})/2$ and $(z_i + z_{i+1})/2$ and calculates the area of each slice. The edges of the slices are constrained to the outer radius of the turbine rotor.
+% 
+% \subsection{Turbine operating region}
+% The turbine operating region (TOR) quantifies how the turbine controls its output power.
+% \begin{itemize}
+% \item{Between cut-in and rated wind speed, the turbine is operating at maximum power coefficient. This is known as Region II.}
+% \item{Between rated and cut-out wind speed, the turbine control system pitches the blades towards feathered to keep the power at the generator's rated power. This is known as Region III.}
+% \end{itemize}
+% 
+% A convenience function, \code{GetTOR()} is used to code this as a factor:
+% 
+% <<>>=
+% data.in$TOR <- GetTOR(data.in$ws.HH, 
+%                       ws.rated = 11.5)
+% data.in[1,]
+% @
+% 
+% \subsection{Training and testing data sets}
+% We'll split the \code{WindPACT1500kW} data into two equal-sized datasets. That gives us a data set to `train' the model, and another to `test' the model that we come up with.
+% 
+% <<>>=
+% ntrain = floor(NROW(data.in)/2)
+% train = rep(FALSE,NROW(data.in))
+% train[sample(nrow(data.in), ntrain)] = TRUE
+% data.train = data.in[train == TRUE,]
+% data.test = data.in[train == FALSE,]
+% @
+% 
+% 
+% \section{Hub-height wind speed power curves}
+% A power curve is often produced using the `method of binning', whereby the mean power is calculated for 0.5 m/s wind-speed bins. The \code{PCTrainTurbineModel()} function uses the methods described in \cite{IEC_61400_12_1} to create the power curve:
+% 
+% <<>>=
+% PCmodel <- PCTrainTurbineModel(ws = data.train$ws.HH.adj,
+%                                power = data.train$power.mean)
+% @
+% 
+% Notice that we use the density-adjusted, hub-height wind speed \code{\$ws.HH.adj} to produce this power curve. If we look at the first few rows of the power curve, we can see the information that it contains:
+% <<>>=
+% PCmodel[1:3,]
+% @
+% 
+% We can plot the power curve using \code{plotPC()}, which is a wrapper around a series of \pkg{ggplot2} commands. We can use any of \pkg{ggplot2}'s functions to alter the plot. The power curve in Figure \ref{fig:PCdemo} was generated using \code{plotPC(PC.ws.HH.adj) + theme_bw(base_size = 8)}.
+% 
+% <<PCdemo, fig.cap="The power curve derived from the WindPACT1500kW data set", fig.pos="h", echo=FALSE, fig.align='center', fig.height = 3, fig.width=5, out.height = '3in', out.width='5in'>>=
+% plotPC(PCmodel) + theme_bw(base_size = 8)
+% @
+% 
+% We can query the trained power curve using \code{PCQueryTurbineModel()} to find the power at a given wind speed. In this example we want the power at a wind speed of 10 m/s:
+% <<>>=
+% PCQueryTurbineModel(power.curve = PCmodel,
+%                     ws = 10)
+% @
+% 
+% The problem with the basic power curve is that it doesn't let us account for other effects on power performance than wind speed. the next sections describe some alternative approaches that can add more information in to the power curve.
+% 
+% \section{Zero turbulence power curves}
+% The zero turbulence power curve has been suggested as a way to quantify the effect of turbulence on the turbine power, and then remove it to find the underlying power curve. The turbulence for a new site can then be added back in to the power curve to give a site-specific power curve. This method is included in the 2014 committee draft of a proposed new IEC 61400-12-1 Power Performance Testing standard.
+% 
+% To start the method, we need a power curve that includes the mean power and the mean turbulence intensity in each of the bins. This can be obtained using \code{PCTrainTurbineModel}:
+% 
+% <<>>=
+% ZT.init.PC <- PCTrainTurbineModel(ws = data.train$ws.HH.adj,
+%                                   power = data.train$power.mean,
+%                                   ti = data.train$Ti.HH)
+% @
+% 
+% Then, we use this power curve to initialize the zero-turbulence power curve. We need to pass in the density at which this power curve was obtained (1.225 kg /m$^3$) and give the turbine diameter, in this case 70 m.
+% 
+% <<>>=
+% ZT.param <- ZTTrainInitTurbineModel(PC.values = ZT.init.PC,
+%                                     rho = 1.225,
+%                                     diameter = 70)
+% @
+% 
+% The output from \code{ZTTrainInitTurbineModel()} is used as one of the inputs to \code{ZTTrainTheoTurbineModel()}, along with the bin-mean values of wind speed, turbulence intensity and power from the power curve:
+% 
+% <<>>=
+% ZT.theo <- ZTTrainTheoTurbineModel(PC.param = ZT.param,
+%                                      ui = ZT.init.PC$ws.binmean,
+%                                      ti = ZT.init.PC$ti.binmean,
+%                                      poweri = ZT.init.PC$power.binmean,
+%                                      rho = 1.225)
+% @
+% 
+% Finally, those data are used to calculate the zero-turbulence power curve:
+% 
+% <<>>=
+% df.PC.zt <- ZTTrainFinalTurbineModel(PC.param = ZT.theo$param,
+%                                      ws = data.train$ws.HH.adj,
+%                                      Ti = data.train$Ti.HH,
+%                                      poweri = data.train$power.mean,
+%                                      diameter = 70)
+% @
+% And we can plot the power curve that we get, using \code{plotPC(df.PC.zt)}:
+% 
+% <<ZTdemo, fig.cap="The zero-turbulence power curve derived from the WindPACT1500kW data set", fig.pos="h", echo=FALSE, fig.align='center', fig.height = 3, fig.width=5, out.height = '3in', out.width='5in'>>=
+% plotPC(df.PC.zt) + theme_bw(base_size = 8)
+% @
+% 
+% The final step is to add turbulence \emph{back} in, so that we can predict performance for a specific site.
+% 
+% \todo[inline]{Need to finish this section.}
+% 
+% \section{Multivariate power curves using random forests}
+% \pkg{\pname} also includes interfaces to a multivariate modeling method called `random forests`, which are coded in the package \pkg{randomForest} \citep{Liaw_2002_a}. Random forests allow many different inputs (continuous or categorical) to be used to estimate a single output. Random forests have been used to predict turbine power output by \cite{Clifton_2013_a, Clifton_2013_d}.
+% 
+% \subsection{Creating a random forest model}
+% Our first random forest model will include variables from the \code{WindPACT1500kW} data set that describe the kinetic energy through the rotor disk (\code{\$ws.HH.adj}), the variability of that energy (\code{\$Ti.HH}), the shear exponent (\code{\$Shear}), and the turbine operating region \code{\$TOR}. The variable we want to predict is the mean power in a 10-minute interval, \code{\$power.mean}.
+% 
+% We can now make data frames for the training and testing data sets. Both the training and testing data set will contain predictors and a response, and need to contain exactly the same variables.
+% <<>>=
+% train.predictors = data.frame("ws.HH" = data.train$ws.HH.adj,
+%                               "ti" = data.train$Ti.HH,
+%                               "shear" = data.train$Shear,
+%                               "TOR" = data.train$TOR)
+% train.response = data.train$power.mean
+% test.predictors = data.frame("ws.HH" = data.test$ws.HH.adj,
+%                              "ti" = data.test$Ti.HH,
+%                              "shear" = data.test$Shear,
+%                              "TOR" = data.test$TOR)
+% test.response = data.test$power.mean
+% @
+% 
+% We can confirm that both data frame contain the same variable names with the \code{names()} function:
+% <<>>=
+% names(train.predictors)
+% names(test.predictors)
+% @
+% 
+% Now, working with the training data, we'll train our random forest-based model. We need to pass in the data frames of training data for the predictive variables, and the response.
+% 
+% <<>>=
+% RFmodel <- RFTrainTurbineModel(predictors = train.predictors,
+%                                response = train.response)
+% @
+% 
+% Our random forest model is now ready for use.
+% 
+% \subsection{Querying the random forest model}
+% Now that we have a model of the turbine, we can query it to find the predicted response to a new set of conditions using \code{RFQueryTurbineModel()}. We can use the first row of the test data set to illustrate this.
+% 
+% <<>>=
+% RFQueryTurbineModel(predictors = test.predictors[1,],
+%                     model = RFmodel)
+% @
+% 
+% It is very important that the data frame we use to query the model (the \code{predictors = ...} argument) has exactly the same names as the training data set.
+% 
+% We can limit our query to the mean power, too:
+% <<>>=
+% RFQueryTurbineModel(predictors = test.predictors[1,],
+%                     model = RFmodel)$mean
+% @
+% 
+% A convenience function \code{RFTrainTestTurbineModel} combines the training and testing of the RF model, and outputs the results.
+% 
+% <<>>=
+% RFTrainTestTurbineModel(train.predictors,
+%                         train.response,
+%                         test.predictors,
+%                         test.response)  
+% @
+% 
+% \subsection{Creating custom random forest models}
+% There are some important things to remember when putting the random forest model together:
+% \begin{enumerate}
+% \item The model can be used to predict any single variable as a function of any input. For example, \cite{Clifton_2013_d} show that it may be possible to predict loads at a turbine deployment site as a function of wind speed, turbulence, and shear using a random forest model trained by high-fidelity simulations.
+% \item The same variable names need to be present in the training data frame and the testing data frame.
+% \item Models should be realistic. Use variables that are important for the turbine response. For the power, that would suggest data that describe the kinetic energy through the rotor disk, the variability of that inflow, and the ability of the turbine to harvest that energy. Also, a variable that describes the turbine controller may help - this could be as simple as the operating region, or possibly some constants within the controller. 
+% \end{enumerate}
+% 
+% \subsection{Limitations of the random forest method}
+% The chief limitation of the random forest method is that it requires the model to be trained with data that encompass the likely range of new cases. This is because the model is a statistically-based approach, rather than physics-based. For example, if the model is only trained with data where wind speeds are less than 10 m/s, a prediction at 12 m/s would be unwise. However, given knowledge of a turbine's rotor size, rated speed, and rated power, an engineer would be able to estimate the likely power at this new wind speed (albeit roughly).
+% 
+% \section{Comparing models}
+% We can test how accurate the different models are, compared to each other. First, we create a new data frame and add a column for the observed power in the testing data frame:
+% 
+% <<>>=
+% PredPower <- data.frame(obs = data.test$power.mean)
+% @
+% 
+% We can compare the observed power during the test, to predictions made using our power curve and the observed wind speed:
+% 
+% <<>>=
+% PredPower$PC <- PCQueryTurbineModel(ws = data.test$ws.HH.adj,
+%                                     power.curve = PCmodel)
+% @
+% 
+% And, we can query the random forest model to find out the power that could be achieved under the new forcing conditions in the \code{data.test} data frame.
+% 
+% <<>>=
+% PredPower$RF <- RFQueryTurbineModel(predictors = test.predictors,
+%                                     model = RFmodel)$mean
+% @
+% 
+% Plotting this data (Figure \ref{fig:PCversusRF}), we see that the random forest method has a much smaller error with respect to the observed power, than the power curve method.
+% <<PCversusRF, fig.cap="Comparison of the power predicted using the power curve and random forest methods", fig.pos="h", echo=FALSE, fig.align='center', fig.height = 3, fig.width=5, out.height = '3in', out.width='5in'>>=
+% ggplot(data = PredPower,
+%        aes(x = obs)) +
+%   geom_point(aes(y = PC, 
+%                  colour = "PC"),
+%              size = 1.5) +
+%   geom_point(aes(y = RF,
+%                  colour = "RF"),
+%              size = 1.5)+
+%   scale_color_manual(name = "Prediction method",
+%                      breaks = c("PC","RF"),
+%                      labels = c("Power curve", "Random Forest"),
+%                      values = c("grey50","red")) +
+%   scale_x_continuous(name = "Observed power (kW)") +
+%   scale_y_continuous(name = "Predicted power (kW)") +
+%   theme_bw(base_size = 8) +
+%   theme(legend.justification=c(0,1), legend.position=c(0,1))
+% @
+% 
+% We can get some error metrics for the different models, too:
+% <<>>=
+% GetErrorMetrics(y = PredPower$obs,
+%                 ymod = PredPower$PC)
+% GetErrorMetrics(y = PredPower$obs,
+%                 ymod = PredPower$RF)
+% @
+% 
+% \section{Future developments}
+% Ideas for future developments of the \pkg{\pname} package should be sent to \href{mailto:andrew.clifton@nrel.gov}{andrew.clifton@nrel.gov}. Ideas that come with code snippets and functions that fit the framework of the package are very welcome!
+% 
+% Current ideas include:
+% \begin{itemize}
+% \item Create a wrapper, e.g. \code{ZTTrainTurbineModel()}, to train a zero-turbulence power curve for a specific site
+% \end{itemize}
