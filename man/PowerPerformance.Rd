@@ -23,8 +23,9 @@ information about each function can be found in its help documentation.
   between observed and predicted values}
 }
 \references{
-Clifton Andrew, Kilcher Levi, Fleming Paul, Ludquist Julie Kay
-(2013). Environmental Research Letters, 8(2), 024009.
-\url{http://iopscience.iop.org/1748-9326/8/2/024009}.
+Clifton, A, and Rozenn Wagner. 2014. “Accounting for
+the effect of turbulence on wind turbine power curves.” Journal of Physics:
+Conference Series 524 (1): 012109.
+\url{http://stacks.iop.org/1742-6596/524/i=1/a=012109}
 }
 

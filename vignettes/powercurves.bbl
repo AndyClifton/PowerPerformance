@@ -1,4 +1,4 @@
-\begin{thebibliography}{4}
+\begin{thebibliography}{7}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -25,6 +25,19 @@ Clifton A, Kilcher L, Lundquist J, Fleming P (2013{\natexlab{b}}).
 \newblock \emph{Environmental Research Letters}, \textbf{8}(2), 024009.
 \newblock \doi{10.1088/1748-9326/8/2/024009}.
 
+\bibitem[{{International Electrotechnical Commission}(2005)}]{IEC_61400_12_1}
+{International Electrotechnical Commission} (2005).
+\newblock \emph{IEC 61400-12: Wind turbines - Part 12: Power performance
+  measurements of electricity producing wind turbines}.
+\newblock 12, 1st {PPUB} edition. International Electrotechnical Commission,
+  Geneva, Switzerland.
+
+\bibitem[{Liaw and Wiener(2002)}]{Liaw_2002_a}
+Liaw A, Wiener M (2002).
+\newblock \enquote{Classification and Regression by randomForest.}
+\newblock \emph{R News}, \textbf{2}(3), 18--22.
+\newblock \urlprefix\url{http://CRAN.R-project.org/doc/Rnews/}.
+
 \bibitem[{Malcolm and Hansen(2006)}]{Malcolm_32495}
 Malcolm DJ, Hansen A (2006).
 \newblock \enquote{Wind{PACT} Turbine Rotor Design Study.}
@@ -37,5 +50,15 @@ Poore R, Lettenmaier T (2003).
   Turbine Drive Train Designs Study.}
 \newblock \emph{Subcontractor Report NREL/SR-500-33196}, National Renewable
   Energy Laboratory.
+
+\bibitem[{Wagner \emph{et~al.}(2011)Wagner, Courtney, Gottschall, and
+  Lindel{\"o}w-Marsden}]{wagner_2011_a}
+Wagner R, Courtney M, Gottschall J, Lindel{\"o}w-Marsden P (2011).
+\newblock \enquote{Accounting for the speed shear in wind turbine power
+  performance measurement.}
+\newblock \emph{Wind Energy}, \textbf{14}(8), 993--1004.
+\newblock ISSN 1099-1824.
+\newblock \doi{10.1002/we.509}.
+\newblock \urlprefix\url{http://dx.doi.org/10.1002/we.509}.
 
 \end{thebibliography}

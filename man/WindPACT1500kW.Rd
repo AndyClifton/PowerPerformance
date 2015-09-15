@@ -34,4 +34,8 @@ using matlab to extract the variables described below.
   speed}{3 m/s}\item{Rated wind speed}{11.5 m/s} \item{Cut-out wind
   speed}{27.6 m/s}}
 }
+\seealso{
+Other timeseries turbine data: \code{\link{PCWGDataSet1}},
+  \code{\link{PCWGdataset1}}
+}
 

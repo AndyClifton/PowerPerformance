@@ -9,8 +9,8 @@ plot.windrose <- function(data,
                           palette = "YlGnBu",
                           countmax = NA,
                           debug = 0){
-  require(ggplot2)
-  require(RColorBrewer)
+  requireNamespace("ggplot2")
+  requireNamespace("RColorBrewer")
     
   # Look to see what data was passed in to the function
   if (is.numeric(spd) & is.numeric(dir)){
