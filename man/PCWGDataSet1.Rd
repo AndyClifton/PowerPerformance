@@ -13,11 +13,8 @@ Group Dataset #1. Data can be found at \url{http://www.pcwg.org}
 \section{Data format}{
  A data frame with 10,653 observations of the following
   variables:
-  \describe{
-  \item{\code{ws.HH}}{hub-height wind speed (m/s),
-  originally 'Hub Wind Speed'}
-  \item{\code{Ti.HH}}{Turbulence intensity at
-  hub height (\%), originally 'Hub Turbulence' }
+  \describe{\item{\code{ws.HH}}{hub-height wind speed (m/s), originally 'Hub Wind Speed'}
+  \item{\code{Ti.HH}}{Turbulence intensity at hub height (\%), originally 'Hub Turbulence' }
   \item{\code{Shear}}{The exponent of the power law fit to the velocity profile, originally 'Shear
   Exponent'}
   \item{\code{ws.eq}}{A rotor-equivalent wind speed (m/s),

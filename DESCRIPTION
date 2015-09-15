@@ -10,6 +10,7 @@ Description: functions to assist in analyzing wind resource data and wind
     turbine performance data. It includes tools to generate power curves using
     a range of methods including IEC 61400-12-1 (2005) and machine-learning
     techniques.
+LazyData: true
 License: GPL (>= 2)
 Depends:
     ggplot2,
