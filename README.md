@@ -10,6 +10,7 @@ This is the repository for an R package intended to provide tools to analyze and
 Click on the "Download ZIP" button on the lower right of this page. 
 
 #Installing and using the package
+Run the following code in the R console:
 ```R
 # identify where the code was downloaded to 
 setwd('~/Downloads/')
