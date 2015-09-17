@@ -10,7 +10,20 @@ This is the repository for an R package intended to provide tools to analyze and
 Click on the "Download ZIP" button on the lower right of this page. 
 
 #Installing and using the package
-
+```R
+# identify where the code was downloaded to 
+setwd('~/Downloads/')
+try(detach(name = "package:PowerPerformance",unload = TRUE))
+library("roxygen2")
+roxygenize(package.dir = "PowerPerformance")
+system("R CMD build PowerPerformance --no-build-vignettes")
+system("R CMD check PowerPerformance")
+system("R CMD INSTALL PowerPerformance --preclean --build")
+try(file.remove(file.path(getwd(),"PowerPerformance.pdf")))
+system("R CMD Rd2pdf PowerPerformance")
+# and make the package available
+library("PowerPerformance")
+```
 
 #Documentation
 Documentation is provided in several forms:
