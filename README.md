@@ -9,8 +9,31 @@ This is the repository for an R package intended to provide tools to analyze and
 #Download
 Click on the "Download ZIP" button on the lower right of this page. 
 
-#Installing and using the package
-Run the following code in the R console:
+# How To Use This Code
+You have the option of installing and running the package, or just sourcing the R code.
+
+## Sourcing the code
+This will have to be done every time you need these functions. No help will be available for the functions. 
+
+Copy all files from the `R` directory into a 'code' directory somewhere. Then, in R, source these files:
+```R
+# define the project root
+project.root <- drive:/path/to/my/stuff
+
+# define where functions live
+code.dir = file.path(project.root,
+                     "code")
+
+# source these functions
+code.files = dir(code.dir, pattern = "\\.R$")
+for (file in code.files){
+  source(file = file.path(code.dir,file))
+}
+
+```
+
+## Installing and using the package
+This approach installs all functions, help, and a vignette. Run the following code in the R console:
 ```R
 # identify where the code was downloaded to 
 setwd('~/Downloads/')
@@ -25,6 +48,8 @@ system("R CMD Rd2pdf PowerPerformance")
 # and make the package available
 library("PowerPerformance")
 ```
+
+You can then include these files in any code by including the line `require(PowerPerformance)` in your code.
 
 #Documentation
 Documentation is provided in several forms:
