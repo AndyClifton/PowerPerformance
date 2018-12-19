@@ -1,12 +1,13 @@
-#Introduction
+# Introduction
+
 This is the repository for an R package intended to provide tools to analyze and vizualise wind turbine power curves.
 
-#Requirements
+# Requirements
 1. A working installation of R. This can be obtained from e.g. http://r-project.org.
 2. Some experience with using R to explore data and plot results.
 3. Basic understanding of how to use command line programs.
 
-#Download
+# Download
 Click on the "Download ZIP" button on the lower right of this page. 
 
 # How To Use This Code
